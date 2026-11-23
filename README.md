@@ -22,9 +22,8 @@ Nada é enviado para a internet, exceto a checagem de versão nova no GitHub.
 
 ## Publicar uma versão nova
 
-```
-git tag v1.0.1
-git push origin v1.0.1
-```
+1. Mude o número no arquivo `VERSAO` (ex.: `1.0.1`).
+2. Escreva as novidades em `notas/v1.0.1.md`.
+3. Faça commit e push na `main`.
 
-O GitHub Actions compila o `.exe` e cria a Release. Notas da versão: `notas/vX.Y.Z.md`.
+O GitHub Actions compila o `.exe`, cria a tag e a Release. Quem já tem o app recebe o aviso de atualização.
