@@ -283,6 +283,18 @@
                 <CheckBox x:Name="IniciarWindowsChk" Content="Abrir junto com o Windows (já escondido perto do relógio, monitorando)" Click="IniciarWindows_Click"/>
               </StackPanel>
             </Border>
+            <Border Style="{StaticResource Cartao}" Margin="0,0,0,10" BorderBrush="#C96442">
+              <StackPanel>
+                <TextBlock Text="Conexão com o Claude" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <TextBlock x:Name="ConexaoTexto" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                <TextBlock Style="{StaticResource Rotulo}" TextWrapping="Wrap" Margin="0,0,0,10" LineHeight="19"
+                           Text="Conectado, o app do Claude no seu PC passa a consultar este app sozinho (estado atual, processos, memória em detalhe, histórico das últimas horas e varredura). É só leitura: o Claude não muda nada no PC por aqui. Depois de conectar, feche o app do Claude por completo (ícone perto do relógio > Sair) e abra de novo. Aí, numa conversa, peça por exemplo: veja como está meu PC no Saúde do Notebook."/>
+                <StackPanel Orientation="Horizontal">
+                  <Button x:Name="BtnConectar" Content="Conectar ao app do Claude" Style="{StaticResource Claude}" Click="BtnConectar_Click"/>
+                  <Button x:Name="BtnDesconectar" Content="Desconectar" Click="BtnDesconectar_Click"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
             <Border Style="{StaticResource Cartao}" Margin="0,0,0,10">
               <StackPanel>
                 <TextBlock Text="Versão e atualizações" FontWeight="SemiBold" Margin="0,0,0,10"/>

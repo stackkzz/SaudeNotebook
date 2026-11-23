@@ -19,9 +19,18 @@ namespace SaudeNotebook
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            DispatcherUnhandledException += ErroNaoTratado;
-
             var args = e.Args.Select(a => a.ToLowerInvariant()).ToArray();
+
+            // Modo servidor MCP: o app do Claude conversa com o .exe por stdin/stdout, sem janela
+            if (args.Contains("--mcp"))
+            {
+                try { McpServidor.Rodar(); }
+                catch (Exception ex) { try { Console.Error.WriteLine(ex); } catch { } }
+                Shutdown();
+                return;
+            }
+
+            DispatcherUnhandledException += ErroNaoTratado;
             IniciouMinimizado = args.Contains("--minimizado");
             AcabouDeAtualizar = args.Contains("--atualizado");
 
@@ -44,6 +53,7 @@ namespace SaudeNotebook
                 return;
             }
             Inicializacao.MigrarVersaoAntiga();
+            ConexaoClaude.AtualizarCaminho();
 
             var janela = new MainWindow();
             MainWindow = janela;

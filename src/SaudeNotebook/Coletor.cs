@@ -36,6 +36,8 @@ namespace SaudeNotebook
         List<string> _gpus = new List<string>();
         double _batProjeto;
         int _batCiclos = -1;
+        string _pentesTexto = "";
+        int _slotsLivres = -1;
         Dictionary<int, (string Caminho, string Cmd)> _caminhos = new Dictionary<int, (string, string)>();
 
         void Iniciar()
@@ -59,6 +61,25 @@ namespace SaudeNotebook
                 if (bc != null) _batCiclos = (int)Wmi.D(bc, "CycleCount");
             }
             catch { }
+            try
+            {
+                var mods = Wmi.Query("SELECT Capacity, ConfiguredClockSpeed, Speed FROM Win32_PhysicalMemory");
+                if (mods.Count > 0)
+                {
+                    var tamanhos = mods.Select(m => Math.Round(Wmi.D(m, "Capacity") / 1073741824.0)).ToList();
+                    double mhz = mods.Max(m => Math.Max(Wmi.D(m, "ConfiguredClockSpeed"), Wmi.D(m, "Speed")));
+                    int slots = 0;
+                    try { slots = Wmi.Query("SELECT MemoryDevices FROM Win32_PhysicalMemoryArray").Sum(a => (int)Wmi.D(a, "MemoryDevices")); } catch { }
+                    string pentes = string.Join(" + ", tamanhos.Select(t => Txt.F("{0:N0} GB", t)));
+                    _pentesTexto = Txt.F("{0} a {1:N0} MT/s", pentes, mhz);
+                    if (slots >= mods.Count)
+                    {
+                        _slotsLivres = slots - mods.Count;
+                        _pentesTexto += Txt.F(" ({0} de {1} slots usados)", mods.Count, slots);
+                    }
+                }
+            }
+            catch { }
             _pronto = true;
         }
 
@@ -74,7 +95,9 @@ namespace SaudeNotebook
                 Nucleos = _nucleos,
                 CpuNome = _cpuNome,
                 CpuMaxMHz = _cpuMaxMHz,
-                Gpus = _gpus
+                Gpus = _gpus,
+                PentesTexto = _pentesTexto,
+                SlotsLivres = _slotsLivres
             };
 
             // ---------- CPU ----------
@@ -113,7 +136,7 @@ namespace SaudeNotebook
                 }
                 r.LigadoHoras = Math.Round(Environment.TickCount64 / 3600000.0, 1);
 
-                var m = Wmi.Primeiro(@"root\cimv2", "SELECT PagesInputPersec, PercentCommittedBytesInUse, CommittedBytes, CommitLimit, StandbyCacheCoreBytes, StandbyCacheNormalPriorityBytes, StandbyCacheReserveBytes, ModifiedPageListBytes, PageFaultsPersec, PageReadsPersec FROM Win32_PerfFormattedData_PerfOS_Memory");
+                var m = Wmi.Primeiro(@"root\cimv2", "SELECT PagesInputPersec, PercentCommittedBytesInUse, CommittedBytes, CommitLimit, StandbyCacheCoreBytes, StandbyCacheNormalPriorityBytes, StandbyCacheReserveBytes, ModifiedPageListBytes, PageFaultsPersec, PageReadsPersec, PoolNonpagedBytes, PoolPagedBytes FROM Win32_PerfFormattedData_PerfOS_Memory");
                 if (m != null)
                 {
                     r.PaginasSeg = Wmi.D(m, "PagesInputPersec");
@@ -124,6 +147,8 @@ namespace SaudeNotebook
                     r.ModificadaGB = Math.Round(Wmi.D(m, "ModifiedPageListBytes") / 1073741824.0, 2);
                     r.FaltasSeg = Wmi.D(m, "PageFaultsPersec");
                     r.LeiturasSeg = Wmi.D(m, "PageReadsPersec");
+                    r.PoolNaoPagMB = Math.Round(Wmi.D(m, "PoolNonpagedBytes") / 1048576.0);
+                    r.PoolPagMB = Math.Round(Wmi.D(m, "PoolPagedBytes") / 1048576.0);
                 }
             }
             catch { }
@@ -216,10 +241,11 @@ namespace SaudeNotebook
             try
             {
                 var lista = new List<ProcInfo>();
-                foreach (var x in Wmi.Query("SELECT Name, IDProcess, PercentProcessorTime, WorkingSetPrivate, IODataBytesPersec, PageFaultsPersec FROM Win32_PerfFormattedData_PerfProc_Process"))
+                foreach (var x in Wmi.Query("SELECT Name, IDProcess, PercentProcessorTime, WorkingSetPrivate, WorkingSet, IODataBytesPersec, PageFaultsPersec FROM Win32_PerfFormattedData_PerfProc_Process"))
                 {
                     string nome = Wmi.S(x, "Name");
                     if (nome == "_Total" || nome == "Idle") continue;
+                    if (nome == "Memory Compression") r.CompactadaMB = Math.Round(Wmi.D(x, "WorkingSet") / 1048576.0);
                     int pid = (int)Wmi.D(x, "IDProcess");
                     if (pid == 0) continue;
                     lista.Add(new ProcInfo
@@ -265,6 +291,7 @@ namespace SaudeNotebook
 
                 r.Procs = top;
                 r.TodosProcs = lista;
+                r.SomaProgramasGB = Math.Round(lista.Where(p => p.Nome != "Memory Compression").Sum(p => p.RamMB) / 1024.0, 1);
             }
             catch { }
 

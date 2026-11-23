@@ -155,6 +155,9 @@ namespace SaudeNotebook
         public double RamPct, RamTotalGB, RamLivreGB, LigadoHoras, PaginasSeg, CommitPct;
         public double CommitGB, CommitLimiteGB, CacheGB, ModificadaGB, FaltasSeg, LeiturasSeg;
         public double PagTamMB = -1, PagUsoMB, PagPicoMB;
+        public double PoolNaoPagMB, PoolPagMB, CompactadaMB, SomaProgramasGB;
+        public string PentesTexto = "";
+        public int SlotsLivres = -1;
 
         public double DiscoPct, DiscoFila, DiscoMBs;
         public List<Unidade> Unidades = new List<Unidade>();

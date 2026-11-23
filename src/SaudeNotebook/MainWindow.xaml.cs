@@ -53,6 +53,7 @@ namespace SaudeNotebook
             PastaTexto.Text = "Histórico e configurações: " + Pastas.Dados + "\nRelatórios HTML: " + Pastas.Relatorios;
             VersaoTexto.Text = Txt.F("Você está na versão {0}. O app confere sozinho se tem versão nova ao abrir e a cada 6 horas.", Atualizador.AtualTexto);
             Title = "Saúde do Notebook " + Atualizador.AtualTexto;
+            AtualizarConexao();
 
             // Gráfico
             _guias = new Line[3];
@@ -581,6 +582,34 @@ namespace SaudeNotebook
             {
                 // Cancelou o pedido de administrador: continua aberto
             }
+        }
+
+        void AtualizarConexao()
+        {
+            bool ok = ConexaoClaude.Conectado;
+            ConexaoTexto.Text = ok ? "Conectado. Se acabou de conectar, reinicie o app do Claude." : "Não conectado.";
+            ConexaoTexto.Foreground = Pincel(ok ? "#4ADE80" : "#AEB4BF");
+            BtnDesconectar.IsEnabled = ok;
+        }
+
+        void BtnConectar_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                int n = ConexaoClaude.Conectar();
+                AtualizarConexao();
+                MessageBox.Show(this, n > 0
+                        ? "Pronto! Agora feche o app do Claude por completo (ícone perto do relógio > Sair) e abra de novo.\n\nNuma conversa, peça por exemplo: \"veja como está meu PC no Saúde do Notebook\"."
+                        : "Não achei o app do Claude para desktop neste PC.",
+                    "Conexão com o Claude");
+            }
+            catch (Exception ex) { Aviso("Não consegui conectar: " + ex.Message); }
+        }
+
+        void BtnDesconectar_Click(object sender, RoutedEventArgs e)
+        {
+            ConexaoClaude.Desconectar();
+            AtualizarConexao();
         }
 
         void Opcao_Click(object sender, RoutedEventArgs e)

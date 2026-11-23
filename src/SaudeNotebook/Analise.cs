@@ -147,6 +147,11 @@ namespace SaudeNotebook
             if (sevPag != "OK" && mem.Ram != "") exp += " Quem mais ocupa RAM: " + mem.Ram + ".";
             Add("Memória lida do disco", Txt.F("{0:N0} páginas/s", d.PaginasSeg), sevPag, exp);
 
+            if (d.PoolNaoPagMB > 0)
+                Add("Memória de drivers", Txt.F("{0:N0} MB não paginável • {1:N0} MB paginável", d.PoolNaoPagMB, d.PoolPagMB),
+                    d.PoolNaoPagMB >= 2048 ? "Crítico" : d.PoolNaoPagMB >= 1536 ? "Atenção" : "OK",
+                    "Memória usada por drivers e pelo kernel. Se a parte não paginável passar de 1,5 GB e continuar subindo, algum driver está vazando (vídeo, rede e antivírus são os suspeitos comuns): atualize os drivers.");
+
             if (d.PagTamMB == 0)
             {
                 Add("Arquivo de paginação", "desligado", d.CommitPct >= 80 ? "Atenção" : "Info",
@@ -207,6 +212,12 @@ namespace SaudeNotebook
                 usado, d.RamTotalGB, d.CommitGB, d.CommitLimiteGB, d.CacheGB, pag, d.PaginasSeg, d.LeiturasSeg, d.FaltasSeg);
 
             var linhas = new List<string>();
+            double kernelGB = (d.PoolNaoPagMB + d.PoolPagMB) / 1024.0;
+            double resto = Math.Max(0, usado - d.SomaProgramasGB - kernelGB - d.CompactadaMB / 1024.0);
+            linhas.Add(Txt.F("Para onde vai a RAM em uso: memória própria dos programas {0:N1} GB • drivers e kernel {1:N1} GB (não paginável {2:N0} MB) • compactada {3:N0} MB • outros {4:N1} GB (memória compartilhada entre programas, arquivos abertos e placa de vídeo integrada)",
+                d.SomaProgramasGB, kernelGB, d.PoolNaoPagMB, d.CompactadaMB, resto));
+            if (d.PentesTexto != "")
+                linhas.Add("Instalada: " + d.PentesTexto + (d.SlotsLivres > 0 ? " — tem slot livre: dá para adicionar outro pente igual." : ""));
             if (mem.Faltas != "") linhas.Add("Quem mais pede memória agora (falhas de página/s): " + mem.Faltas);
             if (mem.Ram != "") linhas.Add("Quem mais ocupa RAM: " + mem.Ram);
             if (Vazamentos.Count > 0)

@@ -524,7 +524,15 @@ namespace SaudeNotebook
                     "Reiniciar limpa a memória e aplica atualizações. Desligar com Inicialização Rápida ligada não conta como reiniciar.");
                 else Add("OK", "Desempenho", "Tempo sem reiniciar", Txt.F("{0:N1} dias.", h / 24));
                 var os = Wmi.Primeiro(@"root\cimv2", "SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
-                Add("Info", "Desempenho", "Memória RAM", Txt.F("{0:N1} GB instalados.", Wmi.D(os, "TotalVisibleMemorySize") / 1048576.0));
+                var mods = Wmi.Query("SELECT Capacity, ConfiguredClockSpeed FROM Win32_PhysicalMemory");
+                int slots = 0;
+                try { slots = Wmi.Query("SELECT MemoryDevices FROM Win32_PhysicalMemoryArray").Sum(x => (int)Wmi.D(x, "MemoryDevices")); } catch { }
+                string pentes = string.Join(" + ", mods.Select(m => Txt.F("{0:N0} GB", Wmi.D(m, "Capacity") / 1073741824.0)));
+                double mhz = mods.Count > 0 ? mods.Max(m => Wmi.D(m, "ConfiguredClockSpeed")) : 0;
+                bool livre = slots > mods.Count && mods.Count > 0;
+                Add(livre ? "Info" : "OK", "Desempenho", "Memória RAM",
+                    Txt.F("{0:N1} GB utilizáveis • pentes: {1} a {2:N0} MT/s • {3} de {4} slots usados", Wmi.D(os, "TotalVisibleMemorySize") / 1048576.0, pentes, mhz, mods.Count, slots),
+                    livre ? Txt.F("Tem slot livre. Um segundo pente igual ({0}, mesma velocidade) dobra a RAM e ativa o dual channel, que deixa CPU e vídeo integrado mais rápidos.", pentes) : "");
             });
 
             Tentar(() =>
