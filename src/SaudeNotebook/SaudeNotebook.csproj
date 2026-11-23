@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>SaudeNotebook</AssemblyName>
+    <RootNamespace>SaudeNotebook</RootNamespace>
+    <ApplicationIcon>Assets\icone.ico</ApplicationIcon>
+    <Version>0.0.0</Version>
+    <Product>Saúde do Notebook</Product>
+    <AssemblyTitle>Saúde do Notebook</AssemblyTitle>
+    <Description>Monitor de saúde, desempenho e segurança do notebook</Description>
+    <Company>stackkzz</Company>
+    <Authors>stackkzz</Authors>
+    <Copyright>stackkzz</Copyright>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <SatelliteResourceLanguages>pt-BR</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\icone.ico" />
+  </ItemGroup>
+
+</Project>

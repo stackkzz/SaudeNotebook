@@ -1,0 +1,65 @@
+name: Compilar
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Definir versão
+        id: versao
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="0.0.${GITHUB_RUN_NUMBER}"; fi
+          echo "v=$V" >> "$GITHUB_OUTPUT"
+
+      - name: Compilar o .exe
+        shell: bash
+        run: |
+          set -o pipefail
+          dotnet publish src/SaudeNotebook/SaudeNotebook.csproj -c Release -r win-x64 --self-contained true \
+            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true \
+            -p:DebugType=none -p:Version=${{ steps.versao.outputs.v }} -o publish 2>&1 | tee build.log
+          ls -la publish
+
+      - name: Preparar notas da versão
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          if [ -f "notas/${GITHUB_REF_NAME}.md" ]; then cp "notas/${GITHUB_REF_NAME}.md" release_body.md
+          else echo "Melhorias e correções." > release_body.md; fi
+
+      - name: Publicar versão
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: publish/SaudeNotebook.exe
+          body_path: release_body.md
+
+      - name: Enviar log para a branch ci-logs
+        if: always()
+        shell: bash
+        run: |
+          cp build.log "$RUNNER_TEMP/build.log" 2>/dev/null || echo "sem log" > "$RUNNER_TEMP/build.log"
+          echo "${{ job.status }} ${{ github.ref_name }} ${{ github.sha }} $(date -u +%FT%TZ)" > "$RUNNER_TEMP/status.txt"
+          git config user.name "ci"
+          git config user.email "ci@users.noreply.github.com"
+          git checkout -q --orphan ci-logs-tmp
+          git rm -rf -q . || true
+          cp "$RUNNER_TEMP/build.log" "$RUNNER_TEMP/status.txt" .
+          git add build.log status.txt
+          git commit -q -m "log ${{ github.ref_name }} ${{ github.sha }}"
+          git push -q -f origin HEAD:refs/heads/ci-logs

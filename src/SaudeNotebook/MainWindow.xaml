@@ -1,0 +1,318 @@
+<Window x:Class="SaudeNotebook.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Saúde do Notebook" Width="1240" Height="820" MinWidth="1020" MinHeight="660"
+        WindowStartupLocation="CenterScreen" Background="#14161B" Foreground="#E6E8EB"
+        FontFamily="Segoe UI" FontSize="13" UseLayoutRounding="True" Language="pt-BR"
+        Icon="/Assets/icone.ico">
+
+  <Grid Margin="18">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- Cabeçalho -->
+    <Grid Grid.Row="0" Margin="0,0,0,12">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <StackPanel>
+        <TextBlock Text="Saúde do Notebook" FontSize="22" FontWeight="SemiBold"/>
+        <TextBlock x:Name="Maquina" Style="{StaticResource Rotulo}" Text="Coletando dados..." TextTrimming="CharacterEllipsis"/>
+      </StackPanel>
+      <Button x:Name="BtnClaude" Grid.Column="1" Style="{StaticResource Claude}" Content="Pedir ajuda ao Claude"
+              VerticalAlignment="Center" Margin="0,0,12,0" Click="BtnClaude_Click"
+              ToolTip="Copia o diagnóstico completo e abre o Claude. É só colar (Ctrl+V) e enviar."/>
+      <Border x:Name="StatusCaixa" Grid.Column="2" CornerRadius="16" Padding="16,8" Background="#1C2A22" VerticalAlignment="Center">
+        <TextBlock x:Name="StatusTexto" Text="Analisando..." FontWeight="SemiBold" Foreground="#4ADE80"/>
+      </Border>
+    </Grid>
+
+    <!-- Atualização disponível -->
+    <Border x:Name="AvisoAtualizacao" Grid.Row="1" Visibility="Collapsed" Background="#14263F" BorderBrush="#2563EB"
+            BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,12">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+          <Button x:Name="BtnAtualizar" Content="Atualizar agora" Style="{StaticResource Primario}" Click="BtnAtualizar_Click"/>
+          <Button Content="Ver novidades" Click="BtnNovidades_Click"/>
+          <Button Content="Depois" Margin="0" Click="BtnDepois_Click"/>
+        </StackPanel>
+        <TextBlock x:Name="TextoAtualizacao" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="#BFD7FF"/>
+      </DockPanel>
+    </Border>
+
+    <!-- Sem administrador -->
+    <Border x:Name="AvisoAdmin" Grid.Row="2" Background="#2A2414" BorderBrush="#5C4A1A" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,12">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="Reabrir como administrador" Margin="10,0,0,0" Click="BtnAdmin_Click"/>
+        <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Foreground="#F5D48A"
+                   Text="Modo limitado: sem administrador ficam de fora a temperatura, os logs de login, as exclusões do antivírus e o desgaste do SSD."/>
+      </DockPanel>
+    </Border>
+
+    <TabControl Grid.Row="3" x:Name="Abas">
+
+      <!-- ===================== AGORA ===================== -->
+      <TabItem Header="Agora">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
+          <UniformGrid Rows="1" Columns="6" Margin="0,0,-10,0">
+            <Border Style="{StaticResource Cartao}" Margin="0,0,10,10">
+              <StackPanel>
+                <TextBlock Text="CPU" Style="{StaticResource Rotulo}"/>
+                <TextBlock x:Name="CpuValor" Text="--" Style="{StaticResource Valor}"/>
+                <TextBlock x:Name="CpuSub" Text=" " Style="{StaticResource Sub}"/>
+                <ProgressBar x:Name="CpuBarra"/>
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Cartao}" Margin="0,0,10,10">
+              <StackPanel>
+                <TextBlock Text="Memória RAM" Style="{StaticResource Rotulo}"/>
+                <TextBlock x:Name="RamValor" Text="--" Style="{StaticResource Valor}"/>
+                <TextBlock x:Name="RamSub" Text=" " Style="{StaticResource Sub}"/>
+                <ProgressBar x:Name="RamBarra"/>
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Cartao}" Margin="0,0,10,10">
+              <StackPanel>
+                <TextBlock Text="Placa de vídeo" Style="{StaticResource Rotulo}"/>
+                <TextBlock x:Name="GpuValor" Text="--" Style="{StaticResource Valor}"/>
+                <TextBlock x:Name="GpuSub" Text=" " Style="{StaticResource Sub}"/>
+                <ProgressBar x:Name="GpuBarra"/>
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Cartao}" Margin="0,0,10,10">
+              <StackPanel>
+                <TextBlock Text="Disco" Style="{StaticResource Rotulo}"/>
+                <TextBlock x:Name="DiscoValor" Text="--" Style="{StaticResource Valor}"/>
+                <TextBlock x:Name="DiscoSub" Text=" " Style="{StaticResource Sub}"/>
+                <ProgressBar x:Name="DiscoBarra"/>
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Cartao}" Margin="0,0,10,10">
+              <StackPanel>
+                <TextBlock Text="Rede" Style="{StaticResource Rotulo}"/>
+                <TextBlock x:Name="RedeValor" Text="--" Style="{StaticResource Valor}"/>
+                <TextBlock x:Name="RedeSub" Text=" " Style="{StaticResource Sub}"/>
+                <ProgressBar x:Name="RedeBarra" Foreground="#60A5FA"/>
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Cartao}" Margin="0,0,10,10">
+              <StackPanel>
+                <TextBlock Text="Bateria" Style="{StaticResource Rotulo}"/>
+                <TextBlock x:Name="BatValor" Text="--" Style="{StaticResource Valor}"/>
+                <TextBlock x:Name="BatSub" Text=" " Style="{StaticResource Sub}"/>
+                <ProgressBar x:Name="BatBarra"/>
+              </StackPanel>
+            </Border>
+          </UniformGrid>
+
+          <Border Grid.Row="1" Style="{StaticResource Cartao}" Margin="0,0,0,10">
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="140"/>
+              </Grid.RowDefinitions>
+              <DockPanel Margin="0,0,0,6">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                  <Rectangle Width="12" Height="3" Fill="#60A5FA" VerticalAlignment="Center"/>
+                  <TextBlock Text=" CPU     " Style="{StaticResource Rotulo}"/>
+                  <Rectangle Width="12" Height="3" Fill="#A78BFA" VerticalAlignment="Center"/>
+                  <TextBlock Text=" GPU     " Style="{StaticResource Rotulo}"/>
+                  <Rectangle Width="12" Height="3" Fill="#F5B942" VerticalAlignment="Center"/>
+                  <TextBlock Text=" RAM" Style="{StaticResource Rotulo}"/>
+                </StackPanel>
+                <TextBlock Text="Últimos 6 minutos (0 a 100%)" Style="{StaticResource Rotulo}"/>
+              </DockPanel>
+              <Canvas x:Name="Grafico" Grid.Row="1" ClipToBounds="True" Background="#16191F" SizeChanged="Grafico_SizeChanged"/>
+            </Grid>
+          </Border>
+
+          <Border Grid.Row="2" Style="{StaticResource Cartao}">
+            <DockPanel>
+              <TextBlock DockPanel.Dock="Top" Text="Alertas ao vivo" FontWeight="SemiBold" Margin="0,0,0,8"/>
+              <DataGrid x:Name="AlertasGrid">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Nível" Binding="{Binding Severidade}" Width="85" ElementStyle="{StaticResource SevTexto}"/>
+                  <DataGridTextColumn Header="Problema" Binding="{Binding Problema}" Width="250" ElementStyle="{StaticResource Quebra}"/>
+                  <DataGridTextColumn Header="Detalhe" Binding="{Binding Detalhe}" Width="*" ElementStyle="{StaticResource Quebra}"/>
+                  <DataGridTemplateColumn Header="" Width="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                      <DataTemplate>
+                        <Button Style="{StaticResource Mini}" Content="Copiar para o Claude" Click="CopiarLinha_Click"/>
+                      </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                  </DataGridTemplateColumn>
+                </DataGrid.Columns>
+              </DataGrid>
+            </DockPanel>
+          </Border>
+        </Grid>
+      </TabItem>
+
+      <!-- ===================== PROCESSOS ===================== -->
+      <TabItem Header="Processos">
+        <DockPanel>
+          <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Ordenar por" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Rotulo}"/>
+            <ComboBox x:Name="Ordenar" Width="140" SelectedIndex="0" Margin="0,0,14,0" VerticalContentAlignment="Center" SelectionChanged="Ordenar_SelectionChanged">
+              <ComboBoxItem Content="CPU"/>
+              <ComboBoxItem Content="GPU"/>
+              <ComboBoxItem Content="Memória"/>
+              <ComboBoxItem Content="Disco/E-S"/>
+              <ComboBoxItem Content="Falhas de página"/>
+            </ComboBox>
+            <CheckBox x:Name="Agrupar" Content="Agrupar por programa" VerticalAlignment="Center" Margin="0,0,14,0" Click="AtualizarProcessos_Click"/>
+            <CheckBox x:Name="PausarProc" Content="Pausar lista" VerticalAlignment="Center" Margin="0,0,18,0" Click="AtualizarProcessos_Click"/>
+            <Button Content="Perguntar ao Claude" Style="{StaticResource Claude}" Click="BtnProcClaude_Click"/>
+            <Button Content="Abrir local do arquivo" Click="BtnLocal_Click"/>
+            <Button Content="Pesquisar na internet" Click="BtnPesquisar_Click"/>
+            <Button Content="Encerrar" Click="BtnEncerrar_Click"/>
+          </WrapPanel>
+          <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Rotulo}" Margin="0,8,0,0" TextWrapping="Wrap"
+                     Text="Selecione uma linha e use os botões acima. A coluna Alerta marca mineradores, programas rodando de pastas temporárias e possíveis vazamentos de memória. Falhas/s = quantas vezes por segundo o programa pediu memória que não estava pronta (parte disso é lida do disco). WmiPrvSE aparece com um pouco de CPU porque este app coleta dados a cada 3 segundos."/>
+          <DataGrid x:Name="ProcGrid">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Processo" Binding="{Binding Nome}" Width="180"/>
+              <DataGridTextColumn Header="Qtd" Binding="{Binding Qtd}" Width="45"/>
+              <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="65"/>
+              <DataGridTextColumn Header="CPU %" Binding="{Binding Cpu}" Width="70"/>
+              <DataGridTextColumn Header="GPU %" Binding="{Binding Gpu}" Width="70"/>
+              <DataGridTextColumn Header="RAM (MB)" Binding="{Binding RamMB}" Width="90"/>
+              <DataGridTextColumn Header="E/S (KB/s)" Binding="{Binding DiscoKBs}" Width="90"/>
+              <DataGridTextColumn Header="Falhas/s" Binding="{Binding Faltas}" Width="80"/>
+              <DataGridTextColumn Header="Alerta" Binding="{Binding Alerta}" Width="160" ElementStyle="{StaticResource AlertaProc}"/>
+              <DataGridTextColumn Header="Caminho" Binding="{Binding Caminho}" Width="*"/>
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+
+      <!-- ===================== ENGASGOS ===================== -->
+      <TabItem Header="Engasgos">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Style="{StaticResource Cartao}" Margin="0,0,0,10">
+            <StackPanel>
+              <TextBlock Text="Diagnóstico agora" Style="{StaticResource Rotulo}"/>
+              <TextBlock x:Name="Veredito" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,4,0,6" Text="Coletando..."/>
+              <TextBlock x:Name="Culpados" Style="{StaticResource Rotulo}" TextWrapping="Wrap"/>
+            </StackPanel>
+          </Border>
+          <Border DockPanel.Dock="Top" Style="{StaticResource Cartao}" Margin="0,0,0,10">
+            <DockPanel>
+              <StackPanel DockPanel.Dock="Right" Margin="10,0,0,0">
+                <Button Content="Abrir Monitor de Recursos" Margin="0,0,0,6" Click="BtnResmon_Click"/>
+                <Button Content="Copiar para o Claude" Style="{StaticResource Claude}" Margin="0" Click="BtnMemClaude_Click"/>
+              </StackPanel>
+              <StackPanel>
+                <TextBlock Text="Memória em detalhe" Style="{StaticResource Rotulo}"/>
+                <TextBlock x:Name="MemDetalhe" TextWrapping="Wrap" Margin="0,4,0,6" Text="Coletando..."/>
+                <TextBlock x:Name="MemCulpados" Style="{StaticResource Rotulo}" TextWrapping="Wrap" LineHeight="19"/>
+              </StackPanel>
+            </DockPanel>
+          </Border>
+          <DataGrid x:Name="EngGrid">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Item" Binding="{Binding Item}" Width="190"/>
+              <DataGridTextColumn Header="Agora" Binding="{Binding Valor}" Width="210"/>
+              <DataGridTextColumn Header="Nível" Binding="{Binding Severidade}" Width="85" ElementStyle="{StaticResource SevTexto}"/>
+              <DataGridTextColumn Header="O que significa" Binding="{Binding Explicacao}" Width="*" ElementStyle="{StaticResource Quebra}"/>
+              <DataGridTemplateColumn Header="" Width="150">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button Style="{StaticResource Mini}" Content="Copiar para o Claude" Click="CopiarLinha_Click"/>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+
+      <!-- ===================== SEGURANÇA ===================== -->
+      <TabItem Header="Segurança e saúde">
+        <DockPanel>
+          <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <Button x:Name="BtnScan" Content="Fazer varredura completa" Style="{StaticResource Primario}" Click="BtnScan_Click"/>
+            <Button Content="Exportar relatório (HTML)" Click="BtnExportar_Click"/>
+            <CheckBox x:Name="SoProblemas" Content="Só problemas" VerticalAlignment="Center" Margin="6,0,16,0" Click="SoProblemas_Click"/>
+            <TextBlock x:Name="ScanStatus" VerticalAlignment="Center" Style="{StaticResource Rotulo}" TextWrapping="Wrap"
+                       Text="Confere antivírus, firewall, mineradores, sinais de invasão, inicialização, discos, bateria e travamentos recentes."/>
+          </DockPanel>
+          <DataGrid x:Name="ScanGrid">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Nível" Binding="{Binding Severidade}" Width="85" ElementStyle="{StaticResource SevTexto}"/>
+              <DataGridTextColumn Header="Categoria" Binding="{Binding Categoria}" Width="105"/>
+              <DataGridTextColumn Header="Item" Binding="{Binding Item}" Width="230" ElementStyle="{StaticResource Quebra}"/>
+              <DataGridTextColumn Header="Detalhe" Binding="{Binding Detalhe}" Width="*" ElementStyle="{StaticResource Quebra}"/>
+              <DataGridTextColumn Header="O que fazer" Binding="{Binding Recomendacao}" Width="270" ElementStyle="{StaticResource Quebra}"/>
+              <DataGridTemplateColumn Header="" Width="150">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button Style="{StaticResource Mini}" Content="Copiar para o Claude" Click="CopiarLinha_Click"/>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+
+      <!-- ===================== OPÇÕES ===================== -->
+      <TabItem Header="Opções">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel>
+            <Border Style="{StaticResource Cartao}" Margin="0,0,0,10">
+              <StackPanel>
+                <TextBlock Text="Monitoramento" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <CheckBox x:Name="NotificarChk" Content="Mostrar notificação do Windows quando surgir um alerta" Margin="0,0,0,8" Click="Opcao_Click"/>
+                <CheckBox x:Name="BandejaChk" Content="Ao minimizar, esconder perto do relógio e continuar monitorando" Margin="0,0,0,8" Click="Opcao_Click"/>
+                <CheckBox x:Name="GravarHistChk" Content="Gravar histórico a cada 30 segundos (arquivo CSV, abre no Excel)" Margin="0,0,0,8" Click="Opcao_Click"/>
+                <CheckBox x:Name="IniciarWindowsChk" Content="Abrir junto com o Windows (já escondido perto do relógio, monitorando)" Click="IniciarWindows_Click"/>
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Cartao}" Margin="0,0,0,10">
+              <StackPanel>
+                <TextBlock Text="Versão e atualizações" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <TextBlock x:Name="VersaoTexto" Style="{StaticResource Rotulo}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal">
+                  <Button x:Name="BtnVerificar" Content="Verificar atualizações agora" Click="BtnVerificar_Click"/>
+                  <Button Content="Ver todas as versões" Click="BtnNovidades_Click"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Cartao}" Margin="0,0,0,10">
+              <StackPanel>
+                <TextBlock Text="Arquivos" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <TextBlock x:Name="PastaTexto" Style="{StaticResource Rotulo}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal">
+                  <Button Content="Abrir pasta do histórico" Click="BtnPasta_Click"/>
+                  <Button Content="Gerar relatório de bateria do Windows" Click="BtnBateria_Click"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Cartao}">
+              <StackPanel>
+                <TextBlock Text="Como os alertas funcionam" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                <TextBlock Style="{StaticResource Rotulo}" TextWrapping="Wrap" LineHeight="20"
+                           Text="Minerador: nome ou comando de minerador conhecido, conexão em porta ou pool de mineração, ou CPU/GPU acima de 40% por mais de 15 s enquanto você está há 2 min sem mexer no PC (descontando a manutenção do Windows). Invasão: processos do sistema rodando fora da pasta do Windows, programas de acesso remoto, contas criadas, logins remotos, log apagado, serviços novos e itens de inicialização com comandos típicos de malware. Engasgo: CPU, disco ou RAM no limite, memória lendo muito do disco, drivers segurando a CPU (DPC), CPU freando por calor ou energia, e bateria drenando acima de 20 W. Vazamento de memória: programa que cresce mais de 400 MB em 5 a 10 minutos sem liberar. Nenhum alerta é prova de nada: é um sinal para olhar mais de perto. Os botões Copiar para o Claude montam um texto pronto para você colar numa conversa com o Claude."/>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
+
+    <TextBlock x:Name="Rodape" Grid.Row="4" Style="{StaticResource Rotulo}" Margin="0,10,0,0" Text=" "/>
+  </Grid>
+</Window>
