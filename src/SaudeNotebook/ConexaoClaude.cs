@@ -23,9 +23,13 @@ namespace SaudeNotebook
                 string pacotes = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages");
                 if (Directory.Exists(pacotes))
                 {
-                    foreach (var p in Directory.GetDirectories(pacotes, "Claude_*"))
+                    // Versão da Microsoft Store: a configuração fica dentro da pasta do pacote (o nome do pacote varia)
+                    foreach (var p in Directory.GetDirectories(pacotes))
                     {
-                        string arq = Path.Combine(p, "LocalCache", "Roaming", "Claude", "claude_desktop_config.json");
+                        if (Path.GetFileName(p).IndexOf("Claude", StringComparison.OrdinalIgnoreCase) < 0) continue;
+                        string pastaCfg = Path.Combine(p, "LocalCache", "Roaming", "Claude");
+                        if (!Directory.Exists(pastaCfg)) continue;
+                        string arq = Path.Combine(pastaCfg, "claude_desktop_config.json");
                         if (incluirInexistentes || File.Exists(arq)) lista.Add(arq);
                     }
                 }
@@ -58,10 +62,7 @@ namespace SaudeNotebook
             string exe = Environment.ProcessPath;
             foreach (var arq in Arquivos(true))
             {
-                // Só cria arquivo novo na pasta normal ou se a pasta do pacote da Store existir
                 string pasta = Path.GetDirectoryName(arq);
-                bool pastaDoPacote = arq.Contains(@"\Packages\");
-                if (pastaDoPacote && !Directory.Exists(Path.GetDirectoryName(Path.GetDirectoryName(pasta)))) continue;
 
                 JsonObject raiz = new JsonObject();
                 if (File.Exists(arq))
@@ -107,6 +108,22 @@ namespace SaudeNotebook
         }
 
         /// <summary>Se já está conectado, mantém o caminho do .exe atualizado (ex.: depois de instalar).</summary>
+        /// <summary>Arquivos de configuração que já têm a conexão (para mostrar na tela).</summary>
+        public static List<string> ArquivosConectados()
+        {
+            var r = new List<string>();
+            foreach (var arq in Arquivos(false))
+            {
+                try
+                {
+                    var raiz = JsonNode.Parse(File.ReadAllText(arq)) as JsonObject;
+                    if (raiz?["mcpServers"] is JsonObject s && s.ContainsKey(Chave)) r.Add(arq);
+                }
+                catch { }
+            }
+            return r;
+        }
+
         public static void AtualizarCaminho()
         {
             try { if (Conectado) Conectar(); } catch { }

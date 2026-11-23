@@ -587,7 +587,9 @@ namespace SaudeNotebook
         void AtualizarConexao()
         {
             bool ok = ConexaoClaude.Conectado;
-            ConexaoTexto.Text = ok ? "Conectado. Se acabou de conectar, reinicie o app do Claude." : "Não conectado.";
+            ConexaoTexto.Text = ok
+                ? "Conectado. Se acabou de conectar, reinicie o app do Claude.\nConfiguração gravada em: " + string.Join("  |  ", ConexaoClaude.ArquivosConectados())
+                : "Não conectado.";
             ConexaoTexto.Foreground = Pincel(ok ? "#4ADE80" : "#AEB4BF");
             BtnDesconectar.IsEnabled = ok;
         }
