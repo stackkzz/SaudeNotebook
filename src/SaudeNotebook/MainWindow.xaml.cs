@@ -29,6 +29,7 @@ namespace SaudeNotebook
         Polyline _linhaCpu, _linhaRam, _linhaGpu;
         Line[] _guias;
 
+        int _ordem;
         bool _coletando, _scanRodando, _saindo, _avisouBandeja, _scanAutoFeito;
         int _tick;
         Dados _ultimo;
@@ -234,7 +235,7 @@ namespace SaudeNotebook
             var d = _ultimo;
             if (d == null) return;
             Func<ProcInfo, double> campo;
-            switch (Ordenar.SelectedIndex)
+            switch (_ordem)
             {
                 case 1: campo = p => p.Gpu; break;
                 case 2: campo = p => p.RamMB; break;
@@ -262,7 +263,7 @@ namespace SaudeNotebook
                     Caminho = g.Select(p => p.Caminho).FirstOrDefault(x => !string.IsNullOrEmpty(x)) ?? ""
                 }).OrderByDescending(campo).Take(80).ToList();
             }
-            else lista = d.Procs.OrderByDescending(campo).ToList();
+            else lista = (d.TodosProcs.Count > 0 ? d.TodosProcs : d.Procs).OrderByDescending(campo).Take(60).ToList();
 
             var sel = ProcGrid.SelectedItem as ProcInfo;
             ProcGrid.ItemsSource = lista;
@@ -494,7 +495,24 @@ namespace SaudeNotebook
         // ================================================================
         //  Botões diversos
         // ================================================================
-        void Ordenar_SelectionChanged(object sender, SelectionChangedEventArgs e) { if (IsLoaded) AtualizarProcessos(); }
+        void Ordem_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is RadioButton r && int.TryParse(r.Tag?.ToString(), out var o)) _ordem = o;
+            if (IsLoaded) AtualizarProcessos();
+        }
+
+        void ProcGrid_Sorting(object sender, DataGridSortingEventArgs e)
+        {
+            e.Handled = true; // a lista é recriada a cada 3 s; a ordem fica nos botões
+            switch (e.Column.SortMemberPath)
+            {
+                case "Cpu": OrdCpu.IsChecked = true; break;
+                case "Gpu": OrdGpu.IsChecked = true; break;
+                case "RamMB": OrdRam.IsChecked = true; break;
+                case "DiscoKBs": OrdDisco.IsChecked = true; break;
+                case "Faltas": OrdFaltas.IsChecked = true; break;
+            }
+        }
         void AtualizarProcessos_Click(object sender, RoutedEventArgs e) { if (PausarProc.IsChecked != true || sender == Agrupar) AtualizarProcessos(); }
         async void BtnScan_Click(object sender, RoutedEventArgs e) => await IniciarScan();
         void SoProblemas_Click(object sender, RoutedEventArgs e) => MostrarScan();

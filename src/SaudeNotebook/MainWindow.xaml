@@ -165,13 +165,15 @@
         <DockPanel>
           <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
             <TextBlock Text="Ordenar por" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Rotulo}"/>
-            <ComboBox x:Name="Ordenar" Width="140" SelectedIndex="0" Margin="0,0,14,0" VerticalContentAlignment="Center" SelectionChanged="Ordenar_SelectionChanged">
-              <ComboBoxItem Content="CPU"/>
-              <ComboBoxItem Content="GPU"/>
-              <ComboBoxItem Content="Memória"/>
-              <ComboBoxItem Content="Disco/E-S"/>
-              <ComboBoxItem Content="Falhas de página"/>
-            </ComboBox>
+            <StackPanel Orientation="Horizontal" Margin="0,0,14,0">
+              <RadioButton x:Name="OrdCpu" GroupName="Ordem" Tag="0" Content="CPU" IsChecked="True" Style="{StaticResource Chip}" Checked="Ordem_Checked"/>
+              <RadioButton x:Name="OrdGpu" GroupName="Ordem" Tag="1" Content="GPU" Style="{StaticResource Chip}" Checked="Ordem_Checked"/>
+              <RadioButton x:Name="OrdRam" GroupName="Ordem" Tag="2" Content="RAM usada" Style="{StaticResource Chip}" Checked="Ordem_Checked"
+                           ToolTip="Quem ocupa mais memória RAM agora"/>
+              <RadioButton x:Name="OrdFaltas" GroupName="Ordem" Tag="4" Content="Pedindo memória" Style="{StaticResource Chip}" Checked="Ordem_Checked"
+                           ToolTip="Quem mais pede memória por segundo (falhas de página). É quem faz a memória trabalhar e, quando falta RAM, ler do disco."/>
+              <RadioButton x:Name="OrdDisco" GroupName="Ordem" Tag="3" Content="Disco" Style="{StaticResource Chip}" Checked="Ordem_Checked"/>
+            </StackPanel>
             <CheckBox x:Name="Agrupar" Content="Agrupar por programa" VerticalAlignment="Center" Margin="0,0,14,0" Click="AtualizarProcessos_Click"/>
             <CheckBox x:Name="PausarProc" Content="Pausar lista" VerticalAlignment="Center" Margin="0,0,18,0" Click="AtualizarProcessos_Click"/>
             <Button Content="Perguntar ao Claude" Style="{StaticResource Claude}" Click="BtnProcClaude_Click"/>
@@ -180,8 +182,8 @@
             <Button Content="Encerrar" Click="BtnEncerrar_Click"/>
           </WrapPanel>
           <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Rotulo}" Margin="0,8,0,0" TextWrapping="Wrap"
-                     Text="Selecione uma linha e use os botões acima. A coluna Alerta marca mineradores, programas rodando de pastas temporárias e possíveis vazamentos de memória. Falhas/s = quantas vezes por segundo o programa pediu memória que não estava pronta (parte disso é lida do disco). WmiPrvSE aparece com um pouco de CPU porque este app coleta dados a cada 3 segundos."/>
-          <DataGrid x:Name="ProcGrid">
+                     Text="Clique em CPU, GPU, RAM usada, Pedindo memória ou Disco (ou no título da coluna) para ordenar. Selecione uma linha e use os botões acima. Pede memória/s = quantas vezes por segundo o programa pediu memória que não estava pronta para ele (falhas de página; parte disso é lida do disco). A coluna Alerta marca mineradores, pastas temporárias e possíveis vazamentos. WmiPrvSE aparece com um pouco de CPU porque este app coleta dados a cada 3 segundos."/>
+          <DataGrid x:Name="ProcGrid" CanUserSortColumns="True" Sorting="ProcGrid_Sorting">
             <DataGrid.Columns>
               <DataGridTextColumn Header="Processo" Binding="{Binding Nome}" Width="180"/>
               <DataGridTextColumn Header="Qtd" Binding="{Binding Qtd}" Width="45"/>
@@ -190,7 +192,7 @@
               <DataGridTextColumn Header="GPU %" Binding="{Binding Gpu}" Width="70"/>
               <DataGridTextColumn Header="RAM (MB)" Binding="{Binding RamMB}" Width="90"/>
               <DataGridTextColumn Header="E/S (KB/s)" Binding="{Binding DiscoKBs}" Width="90"/>
-              <DataGridTextColumn Header="Falhas/s" Binding="{Binding Faltas}" Width="80"/>
+              <DataGridTextColumn Header="Pede memória/s" Binding="{Binding Faltas}" Width="115"/>
               <DataGridTextColumn Header="Alerta" Binding="{Binding Alerta}" Width="160" ElementStyle="{StaticResource AlertaProc}"/>
               <DataGridTextColumn Header="Caminho" Binding="{Binding Caminho}" Width="*"/>
             </DataGrid.Columns>

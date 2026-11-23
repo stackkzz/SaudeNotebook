@@ -40,6 +40,28 @@
       <Setter Property="Margin" Value="0,4"/>
       <Setter Property="FontSize" Value="12"/>
     </Style>
+    <Style x:Key="Chip" TargetType="RadioButton">
+      <Setter Property="Foreground" Value="#C9CDD4"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Margin" Value="0,0,6,0"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="RadioButton">
+            <Border x:Name="c" Background="#20242C" BorderBrush="#3A4150" BorderThickness="1" CornerRadius="14" Padding="12,5">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="c" Property="Background" Value="#2A2F3A"/></Trigger>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="c" Property="Background" Value="#2563EB"/>
+                <Setter TargetName="c" Property="BorderBrush" Value="#2563EB"/>
+                <Setter Property="Foreground" Value="White"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
     <Style TargetType="CheckBox">
       <Setter Property="Foreground" Value="#E6E8EB"/>
     </Style>
